@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>مختبر المثلثات المطور</title>
+    <title>مختبر المثلثات المطور - الإصدار الهندسي</title>
     <style>
         :root {
             --primary: #2563eb;
             --bg: #f1f5f9;
             --panel: #ffffff;
-            --text-dark: #1e293b;
+            --accent: #0ea5e9;
         }
         * { box-sizing: border-box; }
         body {
@@ -26,12 +26,12 @@
             body { flex-direction: column; }
             .sidebar { 
                 width: 100% !important; 
-                height: 45% !important; 
+                height: 50% !important; 
                 order: 2; 
                 overflow-y: auto;
                 border-top: 2px solid #ddd;
             }
-            .main-content { height: 55% !important; order: 1; }
+            .main-content { height: 50% !important; order: 1; }
         }
 
         .sidebar {
@@ -41,7 +41,7 @@
             box-shadow: 0 0 15px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             z-index: 10;
         }
 
@@ -62,70 +62,77 @@
 
         .control-item {
             background: #f8fafc;
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
         }
 
         label {
             display: block;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             color: #475569;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 5px;
             font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             background: #1e293b;
             color: #38bdf8;
-            padding: 12px;
+            padding: 10px;
             border-radius: 6px;
+        }
+
+        .full-width-stat {
+            grid-column: 1 / span 2;
+            border-top: 1px solid #334155;
+            padding-top: 5px;
+            margin-top: 5px;
+            color: #fbbf24; /* لون مميز للمساحة والمحيط */
         }
 
         .btn-reset {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 12px;
+            padding: 10px;
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
             transition: background 0.2s;
         }
         .btn-reset:hover { background: #1d4ed8; }
-        input[type="checkbox"] { cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2 style="margin-top: 0; color: var(--text-dark);">التحكم بالمثلث</h2>
+    <h3 style="margin: 0; color: #1e293b;">مختبر المثلثات</h3>
     
     <div class="control-item">
-        <label>سماكة الخط ولونه</label>
+        <label>التصميم</label>
         <div style="display: flex; gap: 10px; align-items: center;">
             <input type="range" id="lineWidth" min="1" max="10" value="3" style="flex: 1;">
-            <input type="color" id="lineColor" value="#2563eb" style="width: 40px; height: 30px; border: none; cursor: pointer;">
+            <input type="color" id="lineColor" value="#2563eb" style="width: 35px; height: 25px; border: none; cursor: pointer;">
         </div>
     </div>
 
     <div class="control-item">
-        <label>إعدادات العرض</label>
-        <label style="font-weight: normal;"><input type="checkbox" id="showLabels" checked> إظهار القيم (زوايا وأضلاع)</label>
+        <label>خيارات العرض</label>
+        <label style="font-weight: normal;"><input type="checkbox" id="showLabels" checked> القيم على الرسم</label>
         <label style="font-weight: normal;"><input type="checkbox" id="showGrid" checked> إظهار الشبكة</label>
     </div>
 
     <div class="control-item">
-        <label>البيانات الحقيقية</label>
+        <label>البيانات الهندسية</label>
         <div id="stats" class="stats-grid"></div>
     </div>
 
-    <button class="btn-reset" onclick="resetPoints()">إعادة تعيين الشكل</button>
+    <button class="btn-reset" onclick="resetPoints()">إعادة تعيين</button>
 </div>
 
 <div class="main-content" id="canvasContainer">
@@ -155,7 +162,6 @@
         ctx.scale(dpr, dpr);
         canvas.style.width = container.clientWidth + 'px';
         canvas.style.height = container.clientHeight + 'px';
-        
         if (points.length === 0) resetPoints();
         draw();
     }
@@ -164,7 +170,7 @@
         const w = container.clientWidth;
         const h = container.clientHeight;
         points = [
-            { x: w * 0.5, y: h * 0.2, color: '#ef4444', label: 'α' },
+            { x: w * 0.5, y: h * 0.25, color: '#ef4444', label: 'α' },
             { x: w * 0.25, y: h * 0.7, color: '#10b981', label: 'β' },
             { x: w * 0.75, y: h * 0.7, color: '#3b82f6', label: 'γ' }
         ];
@@ -178,7 +184,6 @@
         const h = container.clientHeight;
         ctx.clearRect(0, 0, w, h);
         
-        // 1. رسم الشبكة (تم الإصلاح هنا)
         if (config.showGrid.checked) {
             ctx.beginPath();
             ctx.strokeStyle = '#e2e8f0';
@@ -198,7 +203,17 @@
         const B = Math.acos(Math.max(-1, Math.min(1, (a*a + c*c - b*b)/(2*a*c)))) * 180 / Math.PI || 0;
         const C = Math.max(0, 180 - A - B);
 
-        // 2. رسم أضلاع المثلث
+        // حساب المحيط والمساحة (بافتراض أن 50 بكسل = 1 وحدة)
+        const unitDivisor = 50;
+        const realA = a / unitDivisor;
+        const realB = b / unitDivisor;
+        const realC = c / unitDivisor;
+        
+        const perimeter = realA + realB + realC;
+        const s = perimeter / 2; // نصف المحيط
+        const area = Math.sqrt(Math.max(0, s * (s - realA) * (s - realB) * (s - realC)));
+
+        // رسم أضلاع المثلث
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
         ctx.lineTo(p2.x, p2.y);
@@ -209,54 +224,45 @@
         ctx.lineJoin = 'round';
         ctx.stroke();
 
-        // 3. رسم أطوال الأضلاع
         if (config.showLabels.checked) {
-            ctx.font = "bold 13px sans-serif";
+            ctx.font = "bold 12px sans-serif";
             ctx.fillStyle = "#64748b";
             ctx.textAlign = "center";
-            
-            // نصوص الأضلاع
-            ctx.fillText(`a: ${(a/50).toFixed(1)}`, (p2.x + p3.x)/2, (p2.y + p3.y)/2 + 20);
-            ctx.fillText(`b: ${(b/50).toFixed(1)}`, (p1.x + p3.x)/2 + 25, (p1.y + p3.y)/2);
-            ctx.fillText(`c: ${(c/50).toFixed(1)}`, (p1.x + p2.x)/2 - 25, (p1.y + p2.y)/2);
+            ctx.fillText(`a: ${realA.toFixed(2)}`, (p2.x + p3.x)/2, (p2.y + p3.y)/2 + 20);
+            ctx.fillText(`b: ${realB.toFixed(2)}`, (p1.x + p3.x)/2 + 25, (p1.y + p3.y)/2);
+            ctx.fillText(`c: ${realC.toFixed(2)}`, (p1.x + p2.x)/2 - 25, (p1.y + p2.y)/2);
         }
 
-        // 4. رسم الرؤوس والزوايا
-        const angles = [A, B, C];
         points.forEach((p, i) => {
-            // تأثير الظل للرؤوس
-            ctx.shadowBlur = 5;
-            ctx.shadowColor = 'rgba(0,0,0,0.2)';
             ctx.fillStyle = p.color;
             ctx.beginPath();
-            ctx.arc(p.x, p.y, dragIdx === i ? 15 : 10, 0, Math.PI*2);
+            ctx.arc(p.x, p.y, dragIdx === i ? 14 : 10, 0, Math.PI*2);
             ctx.fill();
-            ctx.shadowBlur = 0;
 
             if (config.showLabels.checked) {
                 ctx.fillStyle = "#1e293b";
-                ctx.font = "bold 14px sans-serif";
-                ctx.fillText(`${p.label}: ${angles[i].toFixed(1)}°`, p.x, p.y - 20);
+                ctx.font = "bold 13px sans-serif";
+                const ang = [A, B, C][i].toFixed(1);
+                ctx.fillText(`${p.label}: ${ang}°`, p.x, p.y - 18);
             }
         });
 
-        // تحديث الجدول
+        // تحديث لوحة البيانات
         statsDiv.innerHTML = `
-            <div>α: ${A.toFixed(1)}°</div> <div>a: ${(a/50).toFixed(1)}</div>
-            <div>β: ${B.toFixed(1)}°</div> <div>b: ${(b/50).toFixed(1)}</div>
-            <div>γ: ${C.toFixed(1)}°</div> <div>c: ${(c/50).toFixed(1)}</div>
+            <div>α: ${A.toFixed(1)}°</div> <div>a: ${realA.toFixed(2)}</div>
+            <div>β: ${B.toFixed(1)}°</div> <div>b: ${realB.toFixed(2)}</div>
+            <div>γ: ${C.toFixed(1)}°</div> <div>c: ${realC.toFixed(2)}</div>
+            <div class="full-width-stat">المحيط: ${perimeter.toFixed(2)} وحدة</div>
+            <div class="full-width-stat">المساحة: ${area.toFixed(2)} وحدة²</div>
         `;
     }
 
-    // إدارة الأحداث
+    // إدارة السحب والإفلات
     function getMousePos(e) {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        return {
-            x: clientX - rect.left,
-            y: clientY - rect.top
-        };
+        return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
     function handleStart(e) {
@@ -271,13 +277,8 @@
         if (dragIdx < 0) return;
         if (e.cancelable) e.preventDefault();
         const pos = getMousePos(e);
-        points[dragIdx].x = pos.x;
-        points[dragIdx].y = pos.y;
-        draw();
-    }
-
-    function handleEnd() {
-        dragIdx = -1;
+        points[dragIdx].x = Math.max(10, Math.min(container.clientWidth - 10, pos.x));
+        points[dragIdx].y = Math.max(10, Math.min(container.clientHeight - 10, pos.y));
         draw();
     }
 
@@ -285,10 +286,9 @@
     canvas.addEventListener('touchstart', handleStart, {passive: false});
     window.addEventListener('mousemove', handleMove);
     window.addEventListener('touchmove', handleMove, {passive: false});
-    window.addEventListener('mouseup', handleEnd);
-    window.addEventListener('touchend', handleEnd);
+    window.addEventListener('mouseup', () => { dragIdx = -1; draw(); });
+    window.addEventListener('touchend', () => { dragIdx = -1; draw(); });
 
-    // ربط المدخلات بالرسم
     [config.lineWidth, config.lineColor, config.showLabels, config.showGrid].forEach(el => {
         el.addEventListener('input', draw);
     });
